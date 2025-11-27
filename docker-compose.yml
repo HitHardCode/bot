@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  eye_of_god_bot:
+    build: .
+    container_name: eye_of_god_bot
+    restart: unless-stopped
+    environment:
+      - TOKEN=8330703021:AAELCOq8uWF4OkNaJviO8V2sQaxnRykiWp4
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./eye_of_god.db:/app/eye_of_god.db

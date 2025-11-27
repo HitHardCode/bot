@@ -24,6 +24,8 @@
 
 ## Установка
 
+### Локальная установка
+
 1. Клонируйте репозиторий:
    ```
    git clone https://github.com/yourusername/eye-of-god-bot.git
@@ -43,6 +45,25 @@
 4. Запустите бота:
    ```
    python osint_bot.py
+   ```
+
+### Docker
+
+1. Соберите образ:
+   ```
+   docker build -t eye-of-god-bot .
+   ```
+
+2. Запустите контейнер:
+   ```
+   docker run -e TOKEN="ваш_токен_бота" eye-of-god-bot
+   ```
+
+### Docker Compose
+
+1. Запустите с compose:
+   ```
+   docker-compose up --build
    ```
 
 ## Использование
