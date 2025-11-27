@@ -91,7 +91,7 @@ class Monitoring(Base):
 Base.metadata.create_all(engine)
 
 # Bot Token
-TOKEN = "8229738211:AAGnfuRJUnOsbb1c3iyL5ZR9F1Ytzk8pF1s"
+TOKEN = "8330703021:AAELCOq8uWF4OkNaJviO8V2sQaxnRykiWp4"
 
 # APIs placeholders
 
