@@ -1,0 +1,13 @@
+python-telegram-bot
+sqlalchemy
+aiohttp
+requests
+beautifulsoup4
+vk-api
+python-whois
+apscheduler
+reportlab
+matplotlib
+folium
+flask
+aiolimiter
