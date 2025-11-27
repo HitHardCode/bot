@@ -79,6 +79,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     telegram_id = Column(Integer, unique=True)
+    is_authorized = Column(Boolean, default=False)
     last_activity = Column(DateTime, default=datetime.utcnow)
 
 class Monitoring(Base):
@@ -219,26 +220,129 @@ async def monitor(query, user_id):
 # Bot Handlers
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Поиск", callback_data='search')],
-        [InlineKeyboardButton("Мониторинг", callback_data='monitor')],
-        [InlineKeyboardButton("Отчет", callback_data='report')]
+        [InlineKeyboardButton("Личность", callback_data='person')],
+        [InlineKeyboardButton("Организация", callback_data='organization')],
+        [InlineKeyboardButton("Событие", callback_data='event')],
+        [InlineKeyboardButton("Геолокация", callback_data='geolocation')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Добро пожаловать в Глаз Бога! Выберите действие:", reply_markup=reply_markup)
+    await update.message.reply_text("Добро пожаловать в Глаз Бога! Выберите категорию OSINT:", reply_markup=reply_markup)
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    if query.data == 'search':
-        await query.edit_message_text("Введите запрос для поиска:")
-    elif query.data == 'monitor':
-        await query.edit_message_text("Введите запрос для мониторинга:")
-    elif query.data == 'report':
-        await query.edit_message_text("Введите данные для отчета:")
+    if query.data == 'person':
+        text = """🕵️ Личность:
+Навальный Алексей Анатольевич 04.06.1976 - ФИО и дата рождения
+
+📲 Контакты:
+79999688666 – номер телефона
+79999688666@mail.ru – email
+
+🚘 Транспорт:
+В395ОК199 – номер автомобиля
+XTA211440C5106924 – VIN автомобиля
+
+💬 Социальные сети:
+@navalny – Telegram
+@navalny – Twitter/X
+@navalny – Instagram
+@navalny – Одноклассники
+
+📟 Telegram:
+@navalny – логин или ID
+
+📄 Документы:
+/vu 1234567890 – водительские права
+/passport 1234567890 – паспорт
+/snils 12345678901 – СНИЛС
+/inn 123456789012 – ИНН
+
+🌐 Онлайн-следы:
+/tag хирург москва – поиск по телефонным книгам
+sherlock.com или 1.1.1.1 – домен или IP
+
+🏚 Недвижимость:
+/adr Москва, Островитянова, 9к4, 94 – адрес
+77:01:0004042:6987 - кадастровый номер
+
+🏢 Юридическое лицо:
+/inn 2540214547 – ИНН
+1107449004464 – ОГРН или ОГРНИП"""
+        await query.edit_message_text(text)
+    elif query.data == 'organization':
+        text = """🏢 Организация:
+ООО "Пример" - название
+
+📄 Документы:
+/inn 123456789012 – ИНН
+1027700123456 – ОГРН
+
+📍 Адрес:
+Москва, ул. Примерная, 1 – юридический адрес
+
+📲 Контакты:
++7 (495) 123-45-67 – телефон
+info@example.com – email
+
+🌐 Сайт:
+www.example.com – официальный сайт
+
+👥 Руководители:
+Иванов Иван Иванович – генеральный директор"""
+        await query.edit_message_text(text)
+    elif query.data == 'event':
+        text = """📅 Событие:
+Конференция по OSINT - название
+
+📅 Дата:
+2025-11-27 – дата проведения
+
+📍 Место:
+Москва, ул. Ленина, 10 – локация
+
+👥 Участники:
+Навальный Алексей, Иванов Иван – список участников
+
+📝 Описание:
+Обсуждение методов открытого сбора информации – краткое описание"""
+        await query.edit_message_text(text)
+    elif query.data == 'geolocation':
+        text = """🌍 Геолокация:
+Москва, Красная площадь - название
+
+📍 Координаты:
+55.7558, 37.6173 – широта, долгота
+
+🏠 Адрес:
+Россия, Москва, Красная площадь, 1 – полный адрес
+
+🏢 Связанные объекты:
+Кремль, ГУМ – здания или места поблизости
+
+📸 Фото/Видео:
+/photo красная площадь – поиск изображений"""
+        await query.edit_message_text(text)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.effective_user.id
+
+    # Check auth
+    session = Session()
+    user = session.query(User).filter_by(telegram_id=user_id).first()
+    if not user:
+        user = User(telegram_id=user_id, is_authorized=True)  # Auto authorize for demo
+        session.add(user)
+        session.commit()
+    elif not user.is_authorized:
+        await update.message.reply_text("Доступ запрещен. Обратитесь к администратору.")
+        session.close()
+        return
+    user.last_activity = datetime.utcnow()
+    session.commit()
+    logger.info(f"User {user_id} performed action: {text}")
+    session.close()
 
     # Rate limit
     async with limiter:
