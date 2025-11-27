@@ -11,3 +11,4 @@ matplotlib==3.8.2
 folium==0.15.1
 flask==3.0.0
 aiolimiter==1.1.0
+nest_asyncio==1.6.0
