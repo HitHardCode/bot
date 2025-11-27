@@ -19,8 +19,10 @@ import io
 from aiolimiter import AsyncLimiter
 import hashlib
 import nest_asyncio
+from dotenv import load_dotenv
 
 nest_asyncio.apply()
+load_dotenv()
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -91,7 +93,7 @@ class Monitoring(Base):
 Base.metadata.create_all(engine)
 
 # Bot Token
-TOKEN = "8330703021:AAELCOq8uWF4OkNaJviO8V2sQaxnRykiWp4"
+TOKEN = os.getenv('TOKEN', '8330703021:AAELCOq8uWF4OkNaJviO8V2sQaxnRykiWp4')
 
 # APIs placeholders
 
