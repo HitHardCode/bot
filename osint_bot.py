@@ -79,7 +79,6 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     telegram_id = Column(Integer, unique=True)
-    is_authorized = Column(Boolean, default=False)
     last_activity = Column(DateTime, default=datetime.utcnow)
 
 class Monitoring(Base):
@@ -240,16 +239,6 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.effective_user.id
-    # Check auth
-    session = Session()
-    user = session.query(User).filter_by(telegram_id=user_id).first()
-    if not user or not user.is_authorized:
-        await update.message.reply_text("Доступ запрещен. Обратитесь к администратору.")
-        session.close()
-        return
-    user.last_activity = datetime.utcnow()
-    session.commit()
-    session.close()
 
     # Rate limit
     async with limiter:
